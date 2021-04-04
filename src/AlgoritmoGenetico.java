@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner; 
 
-public class App {
+public class AlgoritmoGenetico {
     private static Random rand = new Random();
     public static int[][] alunos; // Configuração inicial
     public static int[][] populacao;
@@ -14,17 +14,17 @@ public class App {
     public static int TAM_ALUNOS;
     
     public static void main(String[] args) throws Exception {
-        //int melhor;
         initAlunos("duplos4.txt");
         printAlunos();  
         initPopulacao();
-        for (int g=0; g<1000; g++)
+        for (int g=0; g<10000; g++)
         {
             System.out.println("Geração: " + (g+1));
             calculaAptidao();
             //if (g%500 == 0)
                 //printPopulacao(); 
-            int c = getMelhor(); 
+            int c = getMelhor();
+            
             boolean ideal = checkIdeal(c);
             if (ideal)
                 break;
@@ -35,13 +35,42 @@ public class App {
             }	          
         }
         printPopulacao(); 
+        int[] c = populacao[getMelhor()];
+        System.out.println(Visual.getStringCromossomo(c));
+        if(args.length == 0) {
+            //escolha default visualizacao rapida
+            //exibiQuartosFinal(); 
+        } 
+        else
+        {
+            switch(args[0].toLowerCase())
+            {
+                case "s":
+                //caso visualizacao completa
+                // chamar mais uma funcao
+                //exibiQuartosFinal();
+                break;
+                default:
+                case "n":
+                //caso visualizacao rapida
+                //exibiQuartosFinal();
+            }
+        }
     }
 
     public static boolean checkIdeal(int cromossomo)
     {
-        if (populacao[cromossomo][TAM_ALUNOS] == 0)
+        if (populacao[cromossomo][TAM_ALUNOS] == 0 || isAptidao100Porcento())
             return true;
         return false;
+    }
+
+    public static boolean isAptidao100Porcento()
+    {
+        for(int i = 1; i < TAM_POPULACAO; i++)
+            if(populacao[i][TAM_ALUNOS] != populacao[i-1][TAM_ALUNOS])
+                return false;
+        return true;
     }
 
     public static void initAlunos(String filename)
@@ -136,7 +165,7 @@ public class App {
     public static void calculaAptidao()
     {
         for (int i = 0; i < TAM_POPULACAO; i++)
-                populacao[i][TAM_ALUNOS] = calculaAptidaoCromossomo(i);
+            populacao[i][TAM_ALUNOS] = calculaAptidaoCromossomo(i);
     }
 
     public static int calculaAptidaoCromossomo(int cromossomo)
@@ -155,15 +184,8 @@ public class App {
 
     private static int getPesoSala(int alunoA, int alunoB)
     {
-        // TAM_ALUNOS = 2
-        // [0] A0
-        // [1] A1
-        // [2] B0
-        // [3] B1
-
         int pesoA = getPesoColegas(alunoA, alunoB+TAM_ALUNOS);
         int pesoB = getPesoColegas(alunoB+TAM_ALUNOS, alunoA);
-        //System.out.println("Aluno 1: "+alunoA+", Aluno 2: "+alunoB+" | Peso 1: "+pesoA+"; Peso 2: "+pesoB+" | Resultado: "+ (pesoA+pesoB));
         return pesoA + pesoB;       
     }
 
@@ -255,10 +277,7 @@ public class App {
             int alunoB2 = populacao[cromossomo][quarto2];
             int aux = alunoB1;
             populacao[cromossomo][quarto1] = alunoB2;
-            populacao[cromossomo][quarto2] = aux;
-              
+            populacao[cromossomo][quarto2] = aux;   
         }
-        
-    }
-      
+    }    
 }
