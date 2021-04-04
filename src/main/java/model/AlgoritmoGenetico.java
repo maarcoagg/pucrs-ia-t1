@@ -1,97 +1,95 @@
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.stage.FileChooser;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
-import java.io.File;
-import java.awt.Desktop;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.util.Scanner; 
-import javafx.scene.layout.VBox;
-import javafx.geometry.Insets; 
-import javafx.collections.ObservableList;
-import javafx.scene.layout.HBox;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Random;
-public class MainInterface extends Application {
+import java.io.File;  
+import java.io.FileNotFoundException;
+import java.util.Scanner; 
+import java.io.IOException;
+
+public class AlgoritmoGenetico {
     private static Random rand = new Random();
     public static int[][] alunos; // Configuração inicial
     public static int[][] populacao;
     public static int[][] intermediaria;
     public static int TAM_POPULACAO = 5;
     public static int TAM_ALUNOS;
-    private Desktop desktop = Desktop.getDesktop();
-    private ObservableList list; 
-    final MainController controller = new MainController();
 
-    @Override
-    public void start(Stage stage) {
-        VBox root = new VBox();
-        final FileChooser fileChooser = new FileChooser();
-
- 
-        final Button openButton = new Button("Abrir arquivo...");
-        final Button restartButton = new Button("Reiniciar");
-        final Button startButton = new Button("Iniciar experimento");
-        HBox hbox = new HBox(openButton, restartButton, startButton);
-        hbox.setSpacing(20);
-
-        openButton.setOnAction(
-            new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(final ActionEvent e) {
-                    File file = fileChooser.showOpenDialog(stage);
-                    if (file != null) {
-                        String result = controller.loadFile(file);
-                        showExperiment(result);
-                    }
-                }
-            });
-
-            restartButton.setOnAction(
-                new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(final ActionEvent e) {
-                        //aqui vai remover todos os dados dos experimentos
-                      list.remove(1, list.size());
-                    }
-                });
-
-            startButton.setOnAction(
-                    new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(final ActionEvent e) {
-                            //aqui vai iniciar a simulacao de fato
-                            controller.startExperiment();
-                            showExperiment(controller.showFinalResult());
-                         ;
-                        }
-                    });
-
-      //Setting the space between the nodes of a VBox pane 
-      root.setSpacing(5);   
-      
-      //Setting the margin to the nodes 
-      root.setMargin(hbox, new Insets(20, 20, 20, 20));  
-      list = root.getChildren(); 
-      list.addAll(hbox);
-        Scene scene = new Scene(root, 640, 480);
-        stage.setScene(scene);
-        stage.show();
+    public String loadFileAndInitAlunos(File file) {
+      try { 
+        Scanner s = new Scanner(file);
+        TAM_ALUNOS = Integer.parseInt(s.nextLine());
+        alunos = new int[TAM_ALUNOS*2][TAM_ALUNOS];
+        for(int i = 0; i < TAM_ALUNOS*2; i++)
+        {
+            if (s.hasNextLine())
+            {
+                String outraEscola = " B";
+                if (i >= TAM_ALUNOS)
+                    outraEscola = " A";
+                String[] afinidades = s.nextLine().split(outraEscola);
+                for(int j = 1; j < afinidades.length; j++ )
+                    alunos[i][j-1] = Integer.parseInt(afinidades[j].trim()) - 1;
+            }
+        }
+        return file.getName();
+    } catch (IOException ex) {
+        System.out.println("File not find");
+        return "";
     }
-    private void openFile(File file) {
+    }
+
+    public void iniciaExperimento() {
+      initPopulacao();
+      for (int g=0; g<10000; g++)
+      {
+          System.out.println("Geração: " + (g+1));
+          calculaAptidao();
+          //if (g%500 == 0)
+              //printPopulacao(); 
+          int c = getMelhor();
+          
+          boolean ideal = checkIdeal(c);
+          if (ideal)
+              break;
+          crossover();
+          populacao = intermediaria.clone();
+          if(rand.nextInt(5)==0) {
+              mutacao();
+          }	          
+      }
+    }
+
+    public String getBestCromossomo() {
+      int[] cromossomo = populacao[getMelhor()];
+      StringBuilder sb = new StringBuilder("Melhor cromossomo:\n");
+      for(int i = 0; i < cromossomo.length-1; i++)
+          sb.append("- Quarto ").append(i+1).append(": A").append(i+1).append(", B").append(cromossomo[i]+1).append("\n");
+      sb.append("Aptidao: ").append(cromossomo[cromossomo.length-1]);
+          
+      return sb.toString();
+    }
+    
+    public static boolean checkIdeal(int cromossomo)
+    {
+        if (populacao[cromossomo][TAM_ALUNOS] == 0 || isAptidao100Porcento())
+            return true;
+        return false;
+    }
+
+    public static boolean isAptidao100Porcento()
+    {
+        for(int i = 1; i < TAM_POPULACAO; i++)
+            if(populacao[i][TAM_ALUNOS] != populacao[i-1][TAM_ALUNOS])
+                return false;
+        return true;
+    }
+
+    public static void initAlunos(String filename)
+    {
         try {
-      
-            Scanner s = new Scanner(file);
+            File config = new File(filename);
+            Scanner s = new Scanner(config);
             TAM_ALUNOS = Integer.parseInt(s.nextLine());
             alunos = new int[TAM_ALUNOS*2][TAM_ALUNOS];
             for(int i = 0; i < TAM_ALUNOS*2; i++)
@@ -108,32 +106,36 @@ public class MainInterface extends Application {
             }
 
             s.close();
-            Label l = new Label("arquivo: "+file.getName()+" carregado com sucesso");
-            list.add(l);
-               
-        } catch (IOException ex) {
-            System.out.println("File not find");
+          } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
         }
     }
 
-    private void showExperiment(String result) { 
-        Label l = new Label(result);
-        list.add(l);
-    }
-
-    public static boolean checkIdeal(int cromossomo)
+    public static void printAlunos()
     {
-        if (populacao[cromossomo][TAM_ALUNOS] == 0 || isAptidao100Porcento())
-            return true;
-        return false;
-    }
-
-    public static boolean isAptidao100Porcento()
-    {
-        for(int i = 1; i < TAM_POPULACAO; i++)
-            if(populacao[i][TAM_ALUNOS] != populacao[i-1][TAM_ALUNOS])
-                return false;
-        return true;
+        System.out.println("\nConfiguração inicial: ");
+        // Escola A
+        for(int i = 0; i < TAM_ALUNOS; i++)
+        {
+            System.out.print("A"+(i+1)+": ");
+            for(int j = 0; j < TAM_ALUNOS; j++)
+            {
+                System.out.print("B"+(alunos[i][j]+1)+" ");
+            }
+            System.out.println();
+        }
+        // Escola B
+        for(int i = TAM_ALUNOS; i < TAM_ALUNOS*2; i++)
+        {
+            System.out.print("B"+(i-TAM_ALUNOS+1)+": ");
+            for(int j = 0; j < TAM_ALUNOS; j++)
+            {
+                System.out.print("A"+(alunos[i][j]+1)+" ");
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 
     public static void initPopulacao()
@@ -210,7 +212,6 @@ public class MainInterface extends Application {
             }   
         return peso;
     }
-
 
     public static void printPopulacao()
     {
@@ -290,10 +291,5 @@ public class MainInterface extends Application {
             populacao[cromossomo][quarto1] = alunoB2;
             populacao[cromossomo][quarto2] = aux;   
         }
-    }  
-
-    public static void main(String[] args) {
-        launch();
-    }
-
+    }    
 }
