@@ -7,5 +7,3 @@ controller/MainController.java
  MainController
 model/AlgoritmoGenetico.java
  AlgoritmoGenetico
-Visual.java
- Visual
