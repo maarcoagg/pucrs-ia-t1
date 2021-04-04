@@ -4,15 +4,15 @@ import java.util.Scanner;
 
 public class Preferencias {
 
-    private int TAM_ALUNOS;
-    private int[][] preferencias;
+    private Integer TAM_ALUNOS = 0;
+    private Integer[][] preferencias;
 
     public Preferencias(String filename) throws FileNotFoundException, Exception
     {
         File f = new File(filename);
         Scanner s = new Scanner(f);
         TAM_ALUNOS = Integer.parseInt(s.nextLine().trim());
-        preferencias = new int[TAM_ALUNOS*2][TAM_ALUNOS];
+        preferencias = new Integer[TAM_ALUNOS*2][TAM_ALUNOS];
         for(int i = 0; i < TAM_ALUNOS*2; i++)
         {
             if (s.hasNextLine())
@@ -39,10 +39,10 @@ public class Preferencias {
     }
 
     /**
-     * 
-     * @param aluno1 aluno referencia
-     * @param aluno2 aluno pesquisado
-     * @return afinidade de aluno1 com aluno2
+     * Calcula a preferencia do aluno 1 por aluno 2
+     * @param aluno1 aluno 1
+     * @param aluno2 aluno 2
+     * @return preferencia
      */
     public int getPreferencia(int aluno1, int aluno2)
     {
@@ -61,7 +61,11 @@ public class Preferencias {
     @Override
     public String toString()
     {
-        StringBuilder sb = new StringBuilder("\nPreferências dos alunos:\n");
+        StringBuilder sb = new StringBuilder("\nPreferências dos alunos:\n")
+                            .append("(+)  ");
+        for(int i = 0; i < TAM_ALUNOS; i++)
+            sb.append(i + "  ");
+        sb.append("(-)\n");
         for(int i = 0; i < TAM_ALUNOS*2; i++)
         {
             int aluno1;
