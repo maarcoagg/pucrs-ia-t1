@@ -2,8 +2,7 @@
 
 ## To-do
 
-1. Ciclo do algoritmo genético 
-  - Add condições de parada
+1. Ciclo do algoritmo genético [OK]
 2. Função de Aptidão [OK]
 3. Visualização
 4. Relatório
