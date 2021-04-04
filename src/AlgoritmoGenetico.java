@@ -1,30 +1,27 @@
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Random;
-import java.io.File;  
-import java.io.FileNotFoundException;
-import java.util.Scanner; 
 
 public class AlgoritmoGenetico {
     private static Random rand = new Random();
-    public static int[][] alunos; // Configuração inicial
     public static int[][] populacao;
     public static int[][] intermediaria;
     public static int TAM_POPULACAO = 5;
     public static int TAM_ALUNOS;
+    private static Preferencias p;
     
     public static void main(String[] args) throws Exception {
-        initAlunos("duplos4.txt");
-        printAlunos();  
+        p = new Preferencias("duplos4.txt");
+        TAM_ALUNOS = p.getTamAlunos();
+        print(p.toString());
         initPopulacao();
         for (int g=0; g<10000; g++)
         {
-            System.out.println("Geração: " + (g+1));
+            print("Geração: " + (g+1));
             calculaAptidao();
             //if (g%500 == 0)
                 //printPopulacao(); 
             int c = getMelhor();
-            
             boolean ideal = checkIdeal(c);
             if (ideal)
                 break;
@@ -36,7 +33,7 @@ public class AlgoritmoGenetico {
         }
         printPopulacao(); 
         int[] c = populacao[getMelhor()];
-        System.out.println(Visual.getStringCromossomo(c));
+        print(Visual.getStringCromossomo(c));
         if(args.length == 0) {
             //escolha default visualizacao rapida
             //exibiQuartosFinal(); 
@@ -73,59 +70,6 @@ public class AlgoritmoGenetico {
         return true;
     }
 
-    public static void initAlunos(String filename)
-    {
-        try {
-            File config = new File(filename);
-            Scanner s = new Scanner(config);
-            TAM_ALUNOS = Integer.parseInt(s.nextLine());
-            alunos = new int[TAM_ALUNOS*2][TAM_ALUNOS];
-            for(int i = 0; i < TAM_ALUNOS*2; i++)
-            {
-                if (s.hasNextLine())
-                {
-                    String outraEscola = " B";
-                    if (i >= TAM_ALUNOS)
-                        outraEscola = " A";
-                    String[] afinidades = s.nextLine().split(outraEscola);
-                    for(int j = 1; j < afinidades.length; j++ )
-                        alunos[i][j-1] = Integer.parseInt(afinidades[j].trim()) - 1;
-                }
-            }
-
-            s.close();
-          } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
-    }
-
-    public static void printAlunos()
-    {
-        System.out.println("\nConfiguração inicial: ");
-        // Escola A
-        for(int i = 0; i < TAM_ALUNOS; i++)
-        {
-            System.out.print("A"+(i+1)+": ");
-            for(int j = 0; j < TAM_ALUNOS; j++)
-            {
-                System.out.print("B"+(alunos[i][j]+1)+" ");
-            }
-            System.out.println();
-        }
-        // Escola B
-        for(int i = TAM_ALUNOS; i < TAM_ALUNOS*2; i++)
-        {
-            System.out.print("B"+(i-TAM_ALUNOS+1)+": ");
-            for(int j = 0; j < TAM_ALUNOS; j++)
-            {
-                System.out.print("A"+(alunos[i][j]+1)+" ");
-            }
-            System.out.println();
-        }
-        System.out.println();
-    }
-
     public static void initPopulacao()
     {
         populacao = new int[TAM_POPULACAO][TAM_ALUNOS+1];
@@ -134,11 +78,9 @@ public class AlgoritmoGenetico {
 
         for(int i = 0; i < TAM_POPULACAO; i++)
         {
-            //Populacao = [i]
             disponivel = getDisponiveis();
             for(int j = 0; j < TAM_ALUNOS; j++)
             {
-                //{ A = [j], B = [i][j] }
                 boolean contains = false;
                 while(!contains)
                 {
@@ -170,41 +112,23 @@ public class AlgoritmoGenetico {
 
     public static int calculaAptidaoCromossomo(int cromossomo)
     {  
-        //Populacao = [cromossomo]
-        //{ A = [j], B = [i][j] }
         int aptidao = 0;        
         for(int j = 0; j < TAM_ALUNOS; j++)
-        {
-            int alunoA = j;
-            int alunoB = populacao[cromossomo][j];
-            aptidao += getPesoSala(alunoA, alunoB);
-        }
+            aptidao += getPesoSala(j, populacao[cromossomo][j]+TAM_ALUNOS);
         return aptidao;
     }
 
     private static int getPesoSala(int alunoA, int alunoB)
     {
-        int pesoA = getPesoColegas(alunoA, alunoB+TAM_ALUNOS);
-        int pesoB = getPesoColegas(alunoB+TAM_ALUNOS, alunoA);
+        int pesoA = p.getPreferencia(alunoA, alunoB);
+        int pesoB = p.getPreferencia(alunoB, alunoA);
         return pesoA + pesoB;       
-    }
-
-    private static int getPesoColegas(int aluno1, int aluno2)
-    {
-        int peso = 0;
-        for(int j = 0; j < TAM_ALUNOS; j++)
-            if (alunos[aluno1][j] == aluno2)
-            {
-                peso = j;
-                break;
-            }   
-        return peso;
     }
 
     public static void printPopulacao()
     {
         int j;
-        System.out.println("Populacao:");
+        print("Populacao:");
         for(int i = 0; i < TAM_POPULACAO; i++)
         {
             System.out.print("C"+(i+1)+": ");
@@ -212,7 +136,7 @@ public class AlgoritmoGenetico {
             {
                 System.out.print("[A"+(j+1)+",B"+(populacao[i][j]+1)+"] ");
             }
-            System.out.println("F.A.: "+populacao[i][j]);
+            print("F.A.: "+populacao[i][j]);
         }
     }
 
@@ -229,7 +153,7 @@ public class AlgoritmoGenetico {
                 melhorCromossomo = i;
             }   
         }
-        System.out.println("Melhor cromossomo: ["+melhorAptidao+"] Aptidao: "+melhorAptidao);
+        //print("Melhor cromossomo: ["+melhorAptidao+"] Aptidao: "+melhorAptidao);
         for(int i = 0; i < TAM_ALUNOS; i++)
             intermediaria[0][i] = populacao[melhorCromossomo][i];
         return melhorCromossomo;
@@ -239,7 +163,6 @@ public class AlgoritmoGenetico {
         int cromossomoA = rand.nextInt(TAM_POPULACAO);
         int cromossomoB = rand.nextInt(TAM_POPULACAO);        
         
-        //populacao[Cromossomo][alunoA] = [alunoB]
         if(populacao[cromossomoA][TAM_ALUNOS] < populacao[cromossomoB][TAM_ALUNOS])
             return cromossomoA;
         else
@@ -272,7 +195,7 @@ public class AlgoritmoGenetico {
             int quarto1 = rand.nextInt(TAM_ALUNOS);
             int quarto2 = rand.nextInt(TAM_ALUNOS);
         
-            System.out.println("Cromossomo " + (cromossomo+1) + " sofreu MUTAÇÃO nos quartos " + (quarto1+1) + " e " + (quarto2+1));
+            print("Cromossomo " + (cromossomo+1) + " sofreu MUTAÇÃO nos quartos " + (quarto1+1) + " e " + (quarto2+1));
             int alunoB1 = populacao[cromossomo][quarto1];
             int alunoB2 = populacao[cromossomo][quarto2];
             int aux = alunoB1;
@@ -280,4 +203,9 @@ public class AlgoritmoGenetico {
             populacao[cromossomo][quarto2] = aux;   
         }
     }    
+
+    private static void print(String s)
+    {
+        System.out.println(s);
+    } 
 }
