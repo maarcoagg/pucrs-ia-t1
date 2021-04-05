@@ -3,6 +3,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import javafx.scene.control.Button;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.RadioButton;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import java.io.File;
@@ -33,6 +37,8 @@ public class MainInterface extends Application {
     private ObservableList list; 
     final MainController controller = new MainController();
 
+    private boolean isCompleteVisualization = false;
+
     @Override
     public void start(Stage stage) {
         VBox root = new VBox();
@@ -42,7 +48,17 @@ public class MainInterface extends Application {
         final Button openButton = new Button("Abrir arquivo...");
         final Button restartButton = new Button("Reiniciar");
         final Button startButton = new Button("Iniciar experimento");
-        HBox hbox = new HBox(openButton, restartButton, startButton);
+
+        final ToggleGroup group = new ToggleGroup();
+
+        RadioButton rb1 = new RadioButton("Visualização rapida");  
+        rb1.setToggleGroup(group);
+        rb1.setSelected(true);
+
+        RadioButton rb2 = new RadioButton("Visualização completa");
+        rb2.setToggleGroup(group);
+ 
+        HBox hbox = new HBox(openButton, restartButton, startButton, rb1,rb2);
         hbox.setSpacing(20);
 
         openButton.setOnAction(
@@ -57,7 +73,7 @@ public class MainInterface extends Application {
                 }
             });
 
-            restartButton.setOnAction(
+        restartButton.setOnAction(
                 new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(final ActionEvent e) {
@@ -71,9 +87,17 @@ public class MainInterface extends Application {
                         @Override
                         public void handle(final ActionEvent e) {
                             //aqui vai iniciar a simulacao de fato
+                            RadioButton selectedRadioButton = (RadioButton) group.getSelectedToggle();
+                            String selected = selectedRadioButton.getText();
+                            if(selected == "Visualização rapida") {
+                                isCompleteVisualization = false;
+                            } else {
+                                isCompleteVisualization =true;
+                            }
                             controller.startExperiment();
                             showExperiment(controller.showFinalResult());
-                         ;
+
+                            System.out.println("Tipo de visualizacao" + isCompleteVisualization);
                         }
                     });
 
@@ -84,7 +108,7 @@ public class MainInterface extends Application {
       root.setMargin(hbox, new Insets(20, 20, 20, 20));  
       list = root.getChildren(); 
       list.addAll(hbox);
-        Scene scene = new Scene(root, 640, 480);
+        Scene scene = new Scene(root, 740, 580);
         stage.setScene(scene);
         stage.show();
     }
