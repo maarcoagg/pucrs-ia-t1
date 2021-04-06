@@ -26,6 +26,10 @@ import javafx.scene.layout.HBox;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Random;
+import javafx.scene.control.ScrollBar;
+import javafx.geometry.Orientation;
+import javafx.scene.control.ScrollPane;
+
 public class MainInterface extends Application {
     private static Random rand = new Random();
     public static int[][] alunos; // Configuração inicial
@@ -39,6 +43,8 @@ public class MainInterface extends Application {
 
     private boolean isCompleteVisualization = false;
 
+    private ScrollPane sp = new ScrollPane();
+
     @Override
     public void start(Stage stage) {
         VBox root = new VBox();
@@ -46,7 +52,6 @@ public class MainInterface extends Application {
 
  
         final Button openButton = new Button("Abrir arquivo...");
-        final Button restartButton = new Button("Reiniciar");
         final Button startButton = new Button("Iniciar experimento");
 
         final ToggleGroup group = new ToggleGroup();
@@ -58,7 +63,7 @@ public class MainInterface extends Application {
         RadioButton rb2 = new RadioButton("Visualização completa");
         rb2.setToggleGroup(group);
  
-        HBox hbox = new HBox(openButton, restartButton, startButton, rb1,rb2);
+        HBox hbox = new HBox(openButton, startButton, rb1,rb2);
         hbox.setSpacing(20);
 
         openButton.setOnAction(
@@ -72,16 +77,7 @@ public class MainInterface extends Application {
                     }
                 }
             });
-
-        restartButton.setOnAction(
-                new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(final ActionEvent e) {
-                        //aqui vai remover todos os dados dos experimentos
-                      list.remove(1, list.size());
-                    }
-                });
-
+            
             startButton.setOnAction(
                     new EventHandler<ActionEvent>() {
                         @Override
@@ -106,8 +102,10 @@ public class MainInterface extends Application {
       
       //Setting the margin to the nodes 
       root.setMargin(hbox, new Insets(20, 20, 20, 20));  
+
       list = root.getChildren(); 
       list.addAll(hbox);
+      list.add(sp);
         Scene scene = new Scene(root, 740, 580);
         stage.setScene(scene);
         stage.show();
@@ -142,7 +140,8 @@ public class MainInterface extends Application {
 
     private void showExperiment(String result) { 
         Label l = new Label(result);
-        list.add(l);
+        //list.add(l);
+        sp.setContent(l);
     }
 
     public static boolean checkIdeal(int cromossomo)
