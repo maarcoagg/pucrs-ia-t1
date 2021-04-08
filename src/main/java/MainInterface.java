@@ -13,7 +13,7 @@ import java.io.File;
 import java.awt.Desktop;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import javafx.scene.control.TextField;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import java.io.IOException;
@@ -43,6 +43,8 @@ public class MainInterface extends Application {
 
     private boolean isCompleteVisualization = false;
 
+    private int numberPopulation;
+
     private ScrollPane sp = new ScrollPane();
 
     @Override
@@ -53,6 +55,7 @@ public class MainInterface extends Application {
  
         final Button openButton = new Button("Abrir arquivo...");
         final Button startButton = new Button("Iniciar experimento");
+        TextField numberOfPopulation = new TextField("Numero da população");
 
         final ToggleGroup group = new ToggleGroup();
 
@@ -92,10 +95,13 @@ public class MainInterface extends Application {
                             }
                             controller.startExperiment();
                             showExperiment(controller.showFinalResult());
+                            numberPopulation = Integer.parseInt(numberOfPopulation.getText()); 
+                            System.out.println("Valor digitado" + numberPopulation);
 
                             System.out.println("Tipo de visualizacao" + isCompleteVisualization);
                         }
                     });
+                    
 
       //Setting the space between the nodes of a VBox pane 
       root.setSpacing(5);   
@@ -104,7 +110,7 @@ public class MainInterface extends Application {
       root.setMargin(hbox, new Insets(20, 20, 20, 20));  
 
       list = root.getChildren(); 
-      list.addAll(hbox);
+      list.addAll(hbox, numberOfPopulation);
       list.add(sp);
         Scene scene = new Scene(root, 740, 580);
         stage.setScene(scene);
