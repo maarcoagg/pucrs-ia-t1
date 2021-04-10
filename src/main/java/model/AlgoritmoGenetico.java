@@ -1,5 +1,6 @@
 
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.io.File;  
@@ -12,7 +13,7 @@ public class AlgoritmoGenetico {
     public static int[][] alunos; // Configuração inicial
     public static int[][] populacao;
     public static int[][] intermediaria;
-    public static int TAM_POPULACAO = 5;
+    public static int TAM_POPULACAO = 10000;
     public static int TAM_ALUNOS;
 
     public String loadFileAndInitAlunos(File file) {
@@ -52,7 +53,7 @@ public class AlgoritmoGenetico {
           boolean ideal = checkIdeal(c);
           if (ideal)
               break;
-          crossover();
+          crossoverPBX();
           populacao = intermediaria.clone();
           if(rand.nextInt(5)==0) {
               mutacao();
@@ -258,23 +259,40 @@ public class AlgoritmoGenetico {
             return cromossomoB;
     }
 
-    public static void crossover()
-    {         
-        for (int j=1; j<TAM_POPULACAO; j=j+2)
+    public static void crossoverPBX() {
+        int ind1 = torneio();
+        int ind2 = torneio();
+        //posicoes selecionadas
+        ArrayList<Integer> positionSelecteds = new ArrayList();
+       
+        for (int k=0; k<TAM_ALUNOS; k++)
         {
-            int ind1 = torneio();
-            int ind2 = torneio();
-            for (int k=0; k<TAM_ALUNOS/2; k++)
-            {
-                intermediaria [j][k]= populacao [ind1][k];
-                intermediaria [j+1][k]= populacao [ind2][k];
-            }
-            for (int k=TAM_ALUNOS/2; k<TAM_ALUNOS; k++)
-            {
-                intermediaria [j][k]= populacao [ind2][k];
-                intermediaria [j+1][k]= populacao [ind1][k];
+            if(rand.nextInt(2)==0) {
+                positionSelecteds.add(k);
             }
         }
+
+        for (int i=0; i<positionSelecteds.size(); i++)
+        {
+            int alunoB1 = populacao[ind1][positionSelecteds.get(i)];
+            int alunoB2 =populacao[ind2][positionSelecteds.get(i)];
+            int aux = alunoB1;
+            populacao[ind1][positionSelecteds.get(i)] = alunoB2;
+            populacao[ind2][positionSelecteds.get(i)] = aux;   
+           
+        }
+
+
+        for (int j=1; j<TAM_POPULACAO; j++) {
+            for (int k=0; k<TAM_ALUNOS; k++)
+            {
+               intermediaria[j][k] = populacao[ind1][k];
+               if(j < TAM_POPULACAO - 1) {
+                intermediaria[j + 1][k] = populacao[ind2][k];
+               }
+            }
+        }
+
     }
 
     public static void mutacao(){
