@@ -267,6 +267,7 @@ public class AlgoritmoGenetico {
        
         for (int k=0; k<TAM_ALUNOS; k++)
         {
+            // porcentagem de change de pegar a posicao
             if(rand.nextInt(2)==0) {
                 positionSelecteds.add(k);
             }
