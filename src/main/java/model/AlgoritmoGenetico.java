@@ -46,8 +46,6 @@ public class AlgoritmoGenetico {
       {
           System.out.println("Geração: " + (g+1));
           calculaAptidao();
-          //if (g%500 == 0)
-              //printPopulacao(); 
           int c = getMelhor();
           
           boolean ideal = checkIdeal(c);

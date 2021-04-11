@@ -113,11 +113,8 @@ public class MainInterface extends Application {
                 }
             });
                     
-
-        //Setting the space between the nodes of a VBox pane 
         root.setSpacing(5);   
       
-        //Setting the margin to the nodes 
         root.setMargin(hbox, new Insets(20, 20, 20, 20));  
 
         list = root.getChildren(); 
@@ -136,5 +133,4 @@ public class MainInterface extends Application {
     public static void main(String[] args) {
         launch();
     }
-
 }
