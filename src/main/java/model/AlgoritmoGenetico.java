@@ -13,7 +13,7 @@ public class AlgoritmoGenetico {
     public static int[][] alunos; // Configuração inicial
     public static int[][] populacao;
     public static int[][] intermediaria;
-    public static int TAM_POPULACAO = 10000;
+    public static int TAM_POPULACAO;
     public static int TAM_ALUNOS;
 
     public String loadFileAndInitAlunos(File file) {
@@ -40,8 +40,8 @@ public class AlgoritmoGenetico {
     }
     }
 
-    public void iniciaExperimento() {
-      initPopulacao();
+    public void iniciaExperimento(int sizeOfpopulation) {
+      initPopulacao(sizeOfpopulation);
       for (int g=0; g<10000; g++)
       {
           System.out.println("Geração: " + (g+1));
@@ -139,8 +139,9 @@ public class AlgoritmoGenetico {
         System.out.println();
     }
 
-    public static void initPopulacao()
+    public static void initPopulacao(int sizeOfpopulation)
     {
+        TAM_POPULACAO = sizeOfpopulation;
         populacao = new int[TAM_POPULACAO][TAM_ALUNOS+1];
         intermediaria = new int[TAM_POPULACAO][TAM_ALUNOS+1];
         Set<Integer> disponivel;

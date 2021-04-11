@@ -16,7 +16,7 @@ public class MainController {
     return ag.getBestCromossomo();
   }
 
-  public void startExperiment() {
-    ag.iniciaExperimento();
+  public void startExperiment(int sizeOfpopulation) {
+    ag.iniciaExperimento(sizeOfpopulation);
   }
 }

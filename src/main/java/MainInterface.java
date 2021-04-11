@@ -29,6 +29,7 @@ import java.util.Random;
 import javafx.scene.control.ScrollBar;
 import javafx.geometry.Orientation;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.text.*;
 
 public class MainInterface extends Application {
     private static Random rand = new Random();
@@ -55,7 +56,9 @@ public class MainInterface extends Application {
  
         final Button openButton = new Button("Abrir arquivo...");
         final Button startButton = new Button("Iniciar experimento");
-        TextField numberOfPopulation = new TextField("Numero da população");
+        Text text = new Text();
+        text.setText("Número da população:");
+        TextField numberOfPopulation = new TextField("20");
 
         final ToggleGroup group = new ToggleGroup();
 
@@ -94,12 +97,19 @@ public class MainInterface extends Application {
                     } else {
                         isCompleteVisualization =true;
                     }
-                    controller.startExperiment();
-                    showExperiment(controller.showFinalResult());
-                    numberPopulation = Integer.parseInt(numberOfPopulation.getText()); 
+                    if(numberOfPopulation.getText().isEmpty() || numberOfPopulation.getText()  == null) {
+                        // caso nao seja passado um valor por parametro assume um valor default
+                        numberPopulation = 20;
+                    } else {
+                        numberPopulation = Integer.parseInt(numberOfPopulation.getText()); 
+                    }
+    
                     System.out.println("Valor digitado" + numberPopulation);
 
                     System.out.println("Tipo de visualizacao" + isCompleteVisualization);
+
+                    controller.startExperiment(numberPopulation);
+                    showExperiment(controller.showFinalResult());
                 }
             });
                     
@@ -111,7 +121,7 @@ public class MainInterface extends Application {
         root.setMargin(hbox, new Insets(20, 20, 20, 20));  
 
         list = root.getChildren(); 
-        list.addAll(hbox, numberOfPopulation);
+        list.addAll(hbox, text, numberOfPopulation);
         list.add(sp);
         Scene scene = new Scene(root, 740, 580);
         stage.setScene(scene);
@@ -120,7 +130,6 @@ public class MainInterface extends Application {
 
     private void showExperiment(String result) { 
         Label l = new Label(result);
-        //list.add(l);
         sp.setContent(l);
     }
 
