@@ -15,6 +15,8 @@ public class AlgoritmoGenetico {
     public static int[][] intermediaria;
     public static int TAM_POPULACAO;
     public static int TAM_ALUNOS;
+    private static StringBuilder sbDetails = new StringBuilder("Visualizão detalhada:\n");
+
 
     public String loadFileAndInitAlunos(File file) {
       try { 
@@ -309,5 +311,10 @@ public class AlgoritmoGenetico {
             populacao[cromossomo][quarto1] = alunoB2;
             populacao[cromossomo][quarto2] = aux;   
         }
-    }    
+    }  
+    
+    public String showVisualizationComplete() {
+        sbDetails.append("- comcou ");
+        return sbDetails.toString();
+    }
 }

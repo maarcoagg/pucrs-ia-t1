@@ -109,7 +109,12 @@ public class MainInterface extends Application {
                     System.out.println("Tipo de visualizacao" + isCompleteVisualization);
 
                     controller.startExperiment(numberPopulation);
-                    showExperiment(controller.showFinalResult());
+                    if(isCompleteVisualization) {
+                        String finalT = controller.showCompleteResult() + controller.showFinalResult();
+                        showExperiment(finalT);
+                    }else {
+                        showExperiment(controller.showFinalResult());
+                    }
                 }
             });
                     

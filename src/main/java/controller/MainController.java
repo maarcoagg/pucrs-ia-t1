@@ -1,4 +1,4 @@
-import java.io.File; 
+import java.io.File;
 
 public class MainController {
   private AlgoritmoGenetico ag;
@@ -10,6 +10,10 @@ public class MainController {
   public String loadFile(File file)
   {
    return ag.loadFileAndInitAlunos(file);
+  }
+
+  public String showCompleteResult() {
+    return ag.showVisualizationComplete();
   }
 
   public String showFinalResult() {
