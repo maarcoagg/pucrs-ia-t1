@@ -47,12 +47,15 @@ public class AlgoritmoGenetico {
       for (int g=0; g<10000; g++)
       {
           System.out.println("Geração: " + (g+1));
+          sbDetails.append("Geracao: ").append((g + 1)).append("\n");
           calculaAptidao();
           int c = getMelhor();
-          
+          sbDetails.append("  Melhor  Cromossomo: ").append((c + 1)).append("\n");
           boolean ideal = checkIdeal(c);
-          if (ideal)
-              break;
+          if (ideal) {
+            sbDetails.append("  Condição de parada atendida").append("\n");
+            break;
+          }
           crossoverPBX();
           populacao = intermediaria.clone();
           if(rand.nextInt(5)==0) {
@@ -63,7 +66,7 @@ public class AlgoritmoGenetico {
 
     public String getBestCromossomo() {
       int[] cromossomo = populacao[getMelhor()];
-      StringBuilder sb = new StringBuilder("Melhor cromossomo:\n");
+      StringBuilder sb = new StringBuilder("Melhor Combinação de quartos encontrada:\n");
       for(int i = 0; i < cromossomo.length-1; i++)
           sb.append("- Quarto ").append(i+1).append(": A").append(i+1).append(", B").append(cromossomo[i]+1).append("\n");
       sb.append("Aptidao: ").append(cromossomo[cromossomo.length-1]);
@@ -178,8 +181,11 @@ public class AlgoritmoGenetico {
 
     public static void calculaAptidao()
     {
-        for (int i = 0; i < TAM_POPULACAO; i++)
+        sbDetails.append("  Aptidao:").append("\n");
+        for (int i = 0; i < TAM_POPULACAO; i++) {
             populacao[i][TAM_ALUNOS] = calculaAptidaoCromossomo(i);
+            sbDetails.append("      Populacao ").append(i + 1).append(": ").append(populacao[i][TAM_ALUNOS]).append("\n");
+        }
     }
 
     public static int calculaAptidaoCromossomo(int cromossomo)
@@ -305,6 +311,7 @@ public class AlgoritmoGenetico {
             int quarto2 = rand.nextInt(TAM_ALUNOS);
         
             System.out.println("Cromossomo " + (cromossomo+1) + " sofreu MUTAÇÃO nos quartos " + (quarto1+1) + " e " + (quarto2+1));
+            sbDetails.append("  Cromossomo ").append(cromossomo+1).append(" sofreu MUTAÇÃO nos quartos ").append((quarto1+1)).append(" e ").append( (quarto2+1)).append("\n");
             int alunoB1 = populacao[cromossomo][quarto1];
             int alunoB2 = populacao[cromossomo][quarto2];
             int aux = alunoB1;
@@ -314,7 +321,6 @@ public class AlgoritmoGenetico {
     }  
     
     public String showVisualizationComplete() {
-        sbDetails.append("- comcou ");
         return sbDetails.toString();
     }
 }

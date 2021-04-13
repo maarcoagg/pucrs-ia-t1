@@ -110,7 +110,7 @@ public class MainInterface extends Application {
 
                     controller.startExperiment(numberPopulation);
                     if(isCompleteVisualization) {
-                        String finalT = controller.showCompleteResult() + controller.showFinalResult();
+                        String finalT = controller.showCompleteResult() +"\n"+ controller.showFinalResult();
                         showExperiment(finalT);
                     }else {
                         showExperiment(controller.showFinalResult());
