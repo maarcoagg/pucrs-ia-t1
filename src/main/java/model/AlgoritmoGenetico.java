@@ -42,8 +42,17 @@ public class AlgoritmoGenetico {
     }
     }
 
-    public void iniciaExperimento(int sizeOfpopulation) {
+    public boolean isTaxPercent(int percent) {
+        float lucky = 1 - rand.nextFloat();
+        int rightPercent = percent % 100;
+        return lucky >= 1 - rightPercent;
+    }
+
+    public void iniciaExperimento(int sizeOfpopulation, int taxMutation, int taxCrossover) {
       initPopulacao(sizeOfpopulation);
+      boolean isTaxMutation = isTaxPercent(taxMutation);
+      boolean isTaxCrossover = isTaxPercent(taxCrossover);
+
       for (int g=0; g<10000; g++)
       {
           System.out.println("Geração: " + (g+1));
@@ -56,11 +65,14 @@ public class AlgoritmoGenetico {
             sbDetails.append("  Condição de parada atendida").append("\n");
             break;
           }
-          crossoverPBX();
+          if(isTaxCrossover) {
+            crossoverPBX();
+          }
           populacao = intermediaria.clone();
-          if(rand.nextInt(5)==0) {
-              mutacao();
-          }	          
+
+          if(isTaxMutation) {
+            mutacao();
+          }      
       }
     }
 
@@ -290,7 +302,6 @@ public class AlgoritmoGenetico {
            
         }
 
-
         for (int j=1; j<TAM_POPULACAO; j++) {
             for (int k=0; k<TAM_ALUNOS; k++)
             {
@@ -304,21 +315,18 @@ public class AlgoritmoGenetico {
     }
 
     public static void mutacao(){
-        int quant = rand.nextInt(3)+1;
-        for(int i = 0; i<quant; i++){
-            int cromossomo = rand.nextInt(TAM_POPULACAO);
-            int quarto1 = rand.nextInt(TAM_ALUNOS);
-            int quarto2 = rand.nextInt(TAM_ALUNOS);
+        int cromossomo = rand.nextInt(TAM_POPULACAO);
+        int quarto1 = rand.nextInt(TAM_ALUNOS);
+        int quarto2 = rand.nextInt(TAM_ALUNOS);
         
-            System.out.println("Cromossomo " + (cromossomo+1) + " sofreu MUTAÇÃO nos quartos " + (quarto1+1) + " e " + (quarto2+1));
-            sbDetails.append("  Cromossomo ").append(cromossomo+1).append(" sofreu MUTAÇÃO nos quartos ").append((quarto1+1)).append(" e ").append( (quarto2+1)).append("\n");
-            int alunoB1 = populacao[cromossomo][quarto1];
-            int alunoB2 = populacao[cromossomo][quarto2];
-            int aux = alunoB1;
-            populacao[cromossomo][quarto1] = alunoB2;
-            populacao[cromossomo][quarto2] = aux;   
-        }
-    }  
+        System.out.println("Cromossomo " + (cromossomo+1) + " sofreu MUTAÇÃO nos quartos " + (quarto1+1) + " e " + (quarto2+1));
+        sbDetails.append("  Cromossomo ").append(cromossomo+1).append(" sofreu MUTAÇÃO nos quartos ").append((quarto1+1)).append(" e ").append( (quarto2+1)).append("\n");
+        int alunoB1 = populacao[cromossomo][quarto1];
+        int alunoB2 = populacao[cromossomo][quarto2];
+        int aux = alunoB1;
+        populacao[cromossomo][quarto1] = alunoB2;
+        populacao[cromossomo][quarto2] = aux;         
+    } 
     
     public String showVisualizationComplete() {
         return sbDetails.toString();
