@@ -59,7 +59,9 @@ public class AlgoritmoGenetico {
           sbDetails.append("Geracao: ").append((g + 1)).append("\n");
           calculaAptidao();
           int c = getMelhor();
+          int piorCromosso = getPior();
           sbDetails.append("  Melhor  Cromossomo: ").append((c + 1)).append("\n");
+          sbDetails.append("  Pior  Cromossomo: ").append((piorCromosso + 1)).append("\n");
           boolean ideal = checkIdeal(c);
           if (ideal) {
             sbDetails.append("  Condição de parada atendida").append("\n");
@@ -196,7 +198,7 @@ public class AlgoritmoGenetico {
         sbDetails.append("  Aptidao:").append("\n");
         for (int i = 0; i < TAM_POPULACAO; i++) {
             populacao[i][TAM_ALUNOS] = calculaAptidaoCromossomo(i);
-            sbDetails.append("      Populacao ").append(i + 1).append(": ").append(populacao[i][TAM_ALUNOS]).append("\n");
+            sbDetails.append("      Cromossomo ").append(i + 1).append(": ").append(populacao[i][TAM_ALUNOS]).append("\n");
         }
     }
 
@@ -265,6 +267,23 @@ public class AlgoritmoGenetico {
         for(int i = 0; i < TAM_ALUNOS; i++)
             intermediaria[0][i] = populacao[melhorCromossomo][i];
         return melhorCromossomo;
+    }
+
+    public static int getPior()
+    {
+        int piorCromossomo = 0;
+        int piorAptidao = 0;
+        for(int i = 0; i < TAM_POPULACAO; i++)
+        {
+            int aptidao = populacao[i][TAM_ALUNOS];
+            if (aptidao > piorAptidao)
+            {
+                piorAptidao = aptidao;
+                piorCromossomo = i;
+            }   
+        }
+        System.out.println("Pior cromossomo: ["+piorAptidao+"] Aptidao: "+piorCromossomo);
+        return piorCromossomo;
     }
 
     public static int torneio(){
