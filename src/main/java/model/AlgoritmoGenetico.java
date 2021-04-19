@@ -62,6 +62,7 @@ public class AlgoritmoGenetico {
           int piorCromosso = getPior();
           sbDetails.append("  Melhor  Cromossomo: ").append((c + 1)).append("\n");
           sbDetails.append("  Pior  Cromossomo: ").append((piorCromosso + 1)).append("\n");
+          printPopulacao();
           boolean ideal = checkIdeal(c);
           if (ideal) {
             sbDetails.append("  Condição de parada atendida").append("\n");
@@ -71,7 +72,6 @@ public class AlgoritmoGenetico {
             crossoverPBX();
           }
           populacao = intermediaria.clone();
-
           if(isTaxMutation) {
             mutacao();
           }      
@@ -239,14 +239,19 @@ public class AlgoritmoGenetico {
     {
         int j;
         System.out.println("Populacao:");
+        sbDetails.append("      População:").append("\n");
         for(int i = 0; i < TAM_POPULACAO; i++)
         {
             System.out.print("C"+(i+1)+": ");
+            sbDetails.append("       C").append(i + 1).append(": ");
             for(j = 0; j < TAM_ALUNOS; j++)
             {
                 System.out.print("[A"+(j+1)+",B"+(populacao[i][j]+1)+"] ");
+                sbDetails.append("[A").append(j + 1).append(",B").append((populacao[i][j]+1)).append("] ");
             }
             System.out.println("F.A.: "+populacao[i][j]);
+            sbDetails.append("F.A.: ").append(populacao[i][j]).append("\n");
+            
         }
     }
 
