@@ -1,15 +1,15 @@
 import java.io.File;
 
 public class MainController {
+
   private AlgoritmoGenetico ag;
 
-  public MainController(){
+  public MainController() {
     ag = new AlgoritmoGenetico();
   }
-    
-  public String loadFile(File file)
-  {
-   return ag.loadFileAndInitAlunos(file);
+
+  public String loadFile(File file) {
+    return ag.loadFileAndInitAlunos(file);
   }
 
   public String showCompleteResult() {
@@ -23,4 +23,5 @@ public class MainController {
   public void startExperiment(int sizeOfpopulation, int taxMutation, int taxCrossover) {
     ag.iniciaExperimento(sizeOfpopulation, taxMutation, taxCrossover);
   }
+    
 }
