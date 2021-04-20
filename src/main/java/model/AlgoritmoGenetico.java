@@ -10,8 +10,9 @@ import java.io.IOException;
 public class AlgoritmoGenetico {
     private static Random rand = new Random();
     public static int[][] alunos; // Configuração inicial
-    public static int[][] populacao;
-    public static int[][] intermediaria;
+    public static int[][] populacao = null;
+    public static int[][] intermediaria = null;
+    public static int[][] populacaoVazia = null;
     public static int TAM_POPULACAO;
     public static int TAM_ALUNOS;
     private static StringBuilder sbDetails = new StringBuilder("Visualizão detalhada:\n");
@@ -41,44 +42,42 @@ public class AlgoritmoGenetico {
         }
     }
 
-    private boolean isPercentRate(int percent) {
-        float lucky = 1 - rand.nextFloat();
-        int rightPercent = percent % 100;
-        return lucky >= 1 - rightPercent;
+    private static boolean checkProbability(int percent) {
+        int randomPercentage = Math.round(rand.nextFloat()*100);
+        debug("Received percentage = "+percent+"%\trandomPercentage = "+randomPercentage+"%\tapproved? "+ ((randomPercentage<=percent) ? true : false));
+        return (randomPercentage<=percent) ? true : false;
     }
 
-    public void iniciaExperimento(int sizeOfpopulation, int taxMutation, int taxCrossover) {
-      initPopulacao(sizeOfpopulation);
-      boolean hasMutationRate = isPercentRate(taxMutation);
-      boolean hasCrossoverRate = isPercentRate(taxCrossover);
+    public void iniciaExperimento(int populationSize, int mutationRate, int crossoverRate) {
+        initPopulacao(populationSize);
+        for (int g=0; g<5; g++)
+        {
+            //  Calcula aptidão da geração atual
+            sbDetails.append("Geracao: ").append((g + 1)).append("\n");
+            calculaAptidao();
+            // Mostra resultado do cálculo
+            int melhorCromossomo = getMelhorCromossomo();
+            int piorCromossomo = getPiorCromossomo();
+            sbDetails.append("  Melhor  Cromossomo: ").append((melhorCromossomo + 1)).append("\n");
+            sbDetails.append("  Pior  Cromossomo: ").append((piorCromossomo + 1)).append("\n");
+            printPopulacao();
+            // Verifica se chegou na condição ideal
+            if (isIdeal(melhorCromossomo))
+            {
+                sbDetails.append("  Condição de parada atendida!").append("\n");
+                break;
+            }
 
-      for (int g=0; g<10000; g++)
-      {
-          //System.out.println("Geração: " + (g+1));
-          sbDetails.append("Geracao: ").append((g + 1)).append("\n");
-          calculaAptidao();
-          int c = getMelhor();
-          int piorCromosso = getPior();
-          sbDetails.append("  Melhor  Cromossomo: ").append((c + 1)).append("\n");
-          sbDetails.append("  Pior  Cromossomo: ").append((piorCromosso + 1)).append("\n");
-          printPopulacao();
-          boolean ideal = checkIdeal(c);
-          if (ideal) {
-            sbDetails.append("  Condição de parada atendida").append("\n");
-            break;
-          }
-          if(hasCrossoverRate) {
-            crossoverPBX();
-          }
-          populacao = intermediaria.clone();
-          if(hasMutationRate) {
-            mutacao();
-          }      
-      }
+            //if(checkProbability(crossoverRate))
+            crossoverPBX(crossoverRate);
+            populacao = intermediaria.clone();
+            //if(checkProbability(mutationRate))
+            mutacao(mutationRate);
+        }
     }
 
     public String getBestCromossomo() {
-      int[] cromossomo = populacao[getMelhor()];
+      int[] cromossomo = populacao[getMelhorCromossomo()];
       StringBuilder sb = new StringBuilder("Melhor combinação de quartos encontrada:\n");
       for(int i = 0; i < cromossomo.length-1; i++)
           sb.append("- Quarto ").append(i+1).append(": A").append(i+1).append(", B").append(cromossomo[i]+1).append("\n");
@@ -87,14 +86,14 @@ public class AlgoritmoGenetico {
       return sb.toString();
     }
     
-    public static boolean checkIdeal(int cromossomo)
+    public static boolean isIdeal(int cromossomo)
     {
-        if (populacao[cromossomo][TAM_ALUNOS] == 0 || isAptidao100Porcento())
+        if (populacao[cromossomo][TAM_ALUNOS] == 0 || isAptidao100PorcentoIgual())
             return true;
         return false;
     }
 
-    public static boolean isAptidao100Porcento()
+    public static boolean isAptidao100PorcentoIgual()
     {
         for(int i = 1; i < TAM_POPULACAO; i++)
             if(populacao[i][TAM_ALUNOS] != populacao[i-1][TAM_ALUNOS])
@@ -131,35 +130,35 @@ public class AlgoritmoGenetico {
 
     public static void printAlunos()
     {
-        //System.out.println("\nConfiguração inicial: ");
+        System.out.println("\nConfiguração inicial: ");
         // Escola A
         for(int i = 0; i < TAM_ALUNOS; i++)
         {
-            //System.out.print("A"+(i+1)+": ");
+            System.out.print("A"+(i+1)+": ");
             for(int j = 0; j < TAM_ALUNOS; j++)
             {
-                //System.out.print("B"+(alunos[i][j]+1)+" ");
+                System.out.print("B"+(alunos[i][j]+1)+" ");
             }
-            //System.out.println();
+            System.out.println();
         }
         // Escola B
         for(int i = TAM_ALUNOS; i < TAM_ALUNOS*2; i++)
         {
-            //System.out.print("B"+(i-TAM_ALUNOS+1)+": ");
+            System.out.print("B"+(i-TAM_ALUNOS+1)+": ");
             for(int j = 0; j < TAM_ALUNOS; j++)
             {
-                //System.out.print("A"+(alunos[i][j]+1)+" ");
+                System.out.print("A"+(alunos[i][j]+1)+" ");
             }
-            //System.out.println();
+            System.out.println();
         }
-        //System.out.println();
+        System.out.println();
     }
 
-    public static void initPopulacao(int sizeOfpopulation)
+    private static void initPopulacao(int populationSize)
     {
-        TAM_POPULACAO = sizeOfpopulation;
+        TAM_POPULACAO = populationSize;
         populacao = new int[TAM_POPULACAO][TAM_ALUNOS+1];
-        intermediaria = new int[TAM_POPULACAO][TAM_ALUNOS+1];
+        populacaoVazia = new int[TAM_POPULACAO][TAM_ALUNOS+1];
         Set<Integer> disponivel;
 
         for(int i = 0; i < TAM_POPULACAO; i++)
@@ -177,6 +176,7 @@ public class AlgoritmoGenetico {
                     if (contains)
                     {
                         populacao[i][j] = aluno2;
+                        populacaoVazia[i][j] = -1;
                         disponivel.remove(aluno2);
                     }
                 }
@@ -254,7 +254,7 @@ public class AlgoritmoGenetico {
         }
     }
 
-    public static int getMelhor()
+    public static int getMelhorCromossomo()
     {
         int melhorCromossomo = Integer.MAX_VALUE;
         int melhorAptidao = Integer.MAX_VALUE;
@@ -267,13 +267,10 @@ public class AlgoritmoGenetico {
                 melhorCromossomo = i;
             }   
         }
-        //System.out.println("Melhor cromossomo: ["+melhorAptidao+"] Aptidao: "+melhorAptidao);
-        for(int i = 0; i < TAM_ALUNOS; i++)
-            intermediaria[0][i] = populacao[melhorCromossomo][i];
         return melhorCromossomo;
     }
 
-    public static int getPior()
+    public static int getPiorCromossomo()
     {
         int piorCromossomo = 0;
         int piorAptidao = 0;
@@ -301,43 +298,111 @@ public class AlgoritmoGenetico {
             return cromossomoB;
     }
 
-    public static void crossoverPBX() {
-        int ind1 = torneio();
-        int ind2 = torneio();
-        //posicoes selecionadas
-        ArrayList<Integer> positionSelecteds = new ArrayList<>();
-       
+    private static ArrayList<Integer> selecionaQuartosAleatoriamente(int randomRate)
+    {
+        // Escolhe quartos para realizar o swap.
+        ArrayList<Integer> quartosSelecionados = new ArrayList<>();
+        debug("Selecionando quartos (chance de "+randomRate+"%)...");
         for (int k=0; k<TAM_ALUNOS; k++)
         {
-            // porcentagem de change de pegar a posicao
-            if(rand.nextInt(2)==0) {
-                positionSelecteds.add(k);
-            }
-        }
-
-        for (int i=0; i<positionSelecteds.size(); i++)
-        {
-            int alunoB1 = populacao[ind1][positionSelecteds.get(i)];
-            int alunoB2 =populacao[ind2][positionSelecteds.get(i)];
-            int aux = alunoB1;
-            populacao[ind1][positionSelecteds.get(i)] = alunoB2;
-            populacao[ind2][positionSelecteds.get(i)] = aux;   
-           
-        }
-
-        for (int j=1; j<TAM_POPULACAO; j++) {
-            for (int k=0; k<TAM_ALUNOS; k++)
+            if (checkProbability(randomRate))
             {
-               intermediaria[j][k] = populacao[ind1][k];
-               if(j < TAM_POPULACAO - 1) {
-                intermediaria[j + 1][k] = populacao[ind2][k];
-               }
+                debug("\tQuarto selecionado: "+k+".");
+                quartosSelecionados.add(k);
             }
         }
-
+        debug("Total de quartos selecionados: "+quartosSelecionados.size()+"/"+TAM_ALUNOS);
+        return quartosSelecionados;
     }
 
-    public static void mutacao(){
+    public static void crossoverPBX(int crossoverRate) {
+        debug("Iniciando crossover PBX...");
+        intermediaria = populacaoVazia.clone();
+        int melhorCromossomo = getMelhorCromossomo();
+
+        // Repassa melhor cromossomo para posição 0 da população intermediária
+        debug("Repassando melhor cromossomo para posição 0 da população intermediária...");
+        for(int i = 0; i < TAM_ALUNOS; i++)
+            intermediaria[0][i] = populacao[melhorCromossomo][i];
+        
+        // Populando tabela intermediária
+        debug("Iniciando crossover PBX...");
+        int p = 1;
+        while (p < TAM_POPULACAO)
+        {
+            if(checkProbability(crossoverRate))
+            {
+                // Escolhe cromossomos por torneio...
+                int c1 = torneio();
+                int c2 = torneio();
+                debug("Cromossomos selecionados por torneio: C"+c1+" e C"+c2);
+                debug("\tC"+c1+" antes do crossover: "+printCromossomo(c1));
+                debug("\tC"+c2+" antes do crossover: "+printCromossomo(c2));
+
+                // Escolhe quartos para realizar o swap.
+                ArrayList<Integer> quartosSelecionados = selecionaQuartosAleatoriamente(50);
+
+                // Faz o swap nos quartos selecionados
+                for (int i=0; i<quartosSelecionados.size(); i++)
+                {
+                    int alunoA = quartosSelecionados.get(i);
+                    debug("Fazendo swapping dos cromossomos "+c1+" e "+c2+" no quarto de A"+alunoA+"...");
+
+                    int aluno1 = populacao[c1][alunoA];
+                    int aluno2 = populacao[c2][alunoA];
+
+                    debug("\tAntes: C["+c1+"] = (A"+alunoA+",B"+aluno1+") e C["+c2+"] = (A"+alunoA+",B"+aluno2+")");
+
+                    intermediaria[p][alunoA] = aluno2;
+                    if (p+1 < TAM_ALUNOS)
+                        intermediaria[p+1][alunoA] = aluno1;
+
+                    String depois = "\tDepois: C["+p+"] = (A"+alunoA+",B"+intermediaria[p][alunoA]+") e C["+(p+1)+"] ";
+                    if (p+1 < TAM_ALUNOS)
+                        depois += "= (A"+alunoA+",B"+intermediaria[p+1][alunoA]+")";
+                    else
+                        depois += "ignorado pois ultrapassa tamanho da população (máx: "+(TAM_POPULACAO-1)+")";
+                    debug(depois);
+                }
+                
+                // Preenche quartos não-selecionados
+                debug("Preenchendo os "+(TAM_ALUNOS-quartosSelecionados.size())+" quartos restantes de C"+c1+" e C"+c2+"...");
+                for(int i = 0; i < TAM_ALUNOS; i++)
+                {
+                    if (!quartosSelecionados.contains(i))
+                    {
+                        
+                    }
+                }
+                p += 2;
+            }
+            else
+            {
+                // Copia direto para intermediária
+                p++;
+            }
+        }
+
+        
+
+        
+
+        
+
+        
+
+        /*for (int c=1; c<TAM_POPULACAO; c++) {
+            for (int k=0; k<TAM_ALUNOS; k++)
+            {
+               intermediaria[c][k] = populacao[c1][k];
+               if(c < TAM_POPULACAO - 1) {
+                intermediaria[c + 1][k] = populacao[c2][k];
+               }
+            }
+        }*/
+    }
+
+    public static void mutacao(int mutationRate){
         int cromossomo = rand.nextInt(TAM_POPULACAO);
         int quarto1 = rand.nextInt(TAM_ALUNOS);
         int quarto2 = rand.nextInt(TAM_ALUNOS);
@@ -353,5 +418,21 @@ public class AlgoritmoGenetico {
     
     public String showVisualizationComplete() {
         return sbDetails.toString();
+    }
+
+    private static String printCromossomo(int c)
+    {
+        StringBuilder sb = new StringBuilder("C["+c+"]: ");
+        for(int alunoA = 0; alunoA < TAM_ALUNOS; alunoA++)
+        {
+            sb.append("(A"+alunoA+", B"+populacao[c][alunoA]+") ");
+        }
+        return sb.toString();
+    }
+
+    public static void debug(String s)
+    {
+        String debugText = "## [info]:\t "+s;
+        System.out.println(debugText);
     }
 }

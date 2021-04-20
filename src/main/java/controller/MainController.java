@@ -22,6 +22,5 @@ public class MainController {
 
   public void startExperiment(int sizeOfpopulation, int taxMutation, int taxCrossover) {
     ag.iniciaExperimento(sizeOfpopulation, taxMutation, taxCrossover);
-  }
-    
+  }  
 }
