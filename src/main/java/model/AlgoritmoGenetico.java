@@ -315,6 +315,18 @@ public class AlgoritmoGenetico {
         return quartosSelecionados;
     }
 
+    // funcao para pegar uma dupla disponivel que ainda nao foi utilizada
+    public static int getAvaliablePartner(int cromossomo, ArrayList<Integer> quartosUsados) {
+        for(int i = 0; i < TAM_ALUNOS; i++) {
+            if(!quartosUsados.contains(populacao[cromossomo][i])) {
+                quartosUsados.add(populacao[cromossomo][i]);
+                return populacao[cromossomo][i];
+            }
+        }
+
+        return -1;
+    }
+
     public static void crossoverPBX(int crossoverRate) {
         debug("Iniciando crossover PBX...");
         intermediaria = populacaoVazia.clone();
@@ -342,6 +354,10 @@ public class AlgoritmoGenetico {
                 // Escolhe quartos para realizar o swap.
                 ArrayList<Integer> quartosSelecionados = selecionaQuartosAleatoriamente(50);
 
+                // arrays com os quartos ja utilizados
+                ArrayList<Integer> quartosUsadosC1 = new ArrayList<>();
+                ArrayList<Integer> quartosUsadosC2 = new ArrayList<>();
+
                 // Faz o swap nos quartos selecionados
                 for (int i=0; i<quartosSelecionados.size(); i++)
                 {
@@ -354,8 +370,12 @@ public class AlgoritmoGenetico {
                     debug("\tAntes: C["+c1+"] = (A"+alunoA+",B"+aluno1+") e C["+c2+"] = (A"+alunoA+",B"+aluno2+")");
 
                     intermediaria[p][alunoA] = aluno2;
+                    //adiciona nos quartos usados de c1 
+                    quartosUsadosC1.add(aluno2);
                     if (p+1 < TAM_ALUNOS)
                         intermediaria[p+1][alunoA] = aluno1;
+                        //adiciona nos quartos usados de c2
+                        quartosUsadosC2.add(aluno1);
 
                     String depois = "\tDepois: C["+p+"] = (A"+alunoA+",B"+intermediaria[p][alunoA]+") e C["+(p+1)+"] ";
                     if (p+1 < TAM_ALUNOS)
@@ -371,7 +391,20 @@ public class AlgoritmoGenetico {
                 {
                     if (!quartosSelecionados.contains(i))
                     {
-                        
+                        //valido a funcao para cada um dos cromossomos
+                        int quartoDisponivelC1 = getAvaliablePartner(c1, quartosUsadosC1);
+                        int quartoDisponivelC2 = getAvaliablePartner(c2, quartosUsadosC2);
+
+                        if(quartoDisponivelC1 != -1) {
+                            intermediaria[p][i] = quartoDisponivelC1;
+                        }
+
+                        //verifica se nao é a ultima posicao disponivel
+                        if (p+1 < TAM_ALUNOS) {
+                            if(quartoDisponivelC1 != -1) {
+                                intermediaria[p+1][i] = quartoDisponivelC2;
+                            }
+                        }
                     }
                 }
                 p += 2;
