@@ -370,12 +370,14 @@ public class AlgoritmoGenetico {
                     debug("\tAntes: C["+c1+"] = (A"+alunoA+",B"+aluno1+") e C["+c2+"] = (A"+alunoA+",B"+aluno2+")");
 
                     intermediaria[p][alunoA] = aluno2;
-                    //adiciona nos quartos usados de c1 
-                    quartosUsadosC1.add(aluno2);
+                    //adiciona aluno usado em c1 
+                    quartosUsadosC1.add(intermediaria[p][alunoA]);
+                    debug("Aluno  B"+aluno2+" usado em C1...");
                     if (p+1 < TAM_ALUNOS)
                         intermediaria[p+1][alunoA] = aluno1;
-                        //adiciona nos quartos usados de c2
-                        quartosUsadosC2.add(aluno1);
+                         //adiciona aluno usado em c2
+                        quartosUsadosC2.add(intermediaria[p+1][alunoA]);
+                        debug("Aluno B"+aluno1+" usado em C2...");
 
                     String depois = "\tDepois: C["+p+"] = (A"+alunoA+",B"+intermediaria[p][alunoA]+") e C["+(p+1)+"] ";
                     if (p+1 < TAM_ALUNOS)
@@ -412,27 +414,13 @@ public class AlgoritmoGenetico {
             else
             {
                 // Copia direto para intermediária
+                for (int k=0; k<TAM_ALUNOS; k++)
+                {
+                   intermediaria[p][k] = populacao[p][k];
+                }
                 p++;
             }
         }
-
-        
-
-        
-
-        
-
-        
-
-        /*for (int c=1; c<TAM_POPULACAO; c++) {
-            for (int k=0; k<TAM_ALUNOS; k++)
-            {
-               intermediaria[c][k] = populacao[c1][k];
-               if(c < TAM_POPULACAO - 1) {
-                intermediaria[c + 1][k] = populacao[c2][k];
-               }
-            }
-        }*/
     }
 
     public static void mutacao(int mutationRate){
