@@ -63,9 +63,9 @@ public class MainInterface extends Application {
         Text text = new Text();
         text.setText("Número da população:");
         Text textMutation = new Text();
-        textMutation.setText("Taxa de mutacao de 0 a 100:");
+        textMutation.setText("Taxa de mutação de 0 a 100:");
         Text textCrossover = new Text();
-        textCrossover.setText("Taxa de Crossover de 0 a 100:");
+        textCrossover.setText("Taxa de crossover de 0 a 100:");
 
         TextField numberOfPopulation = new TextField("20");
         // por default crossover tera 100% e a mutacao 5%
@@ -74,7 +74,7 @@ public class MainInterface extends Application {
 
         final ToggleGroup group = new ToggleGroup();
 
-        RadioButton rb1 = new RadioButton("Visualização rapida");  
+        RadioButton rb1 = new RadioButton("Visualização rápida");  
         rb1.setToggleGroup(group);
         rb1.setSelected(true);
 
