@@ -52,9 +52,9 @@ public class MainInterface extends Application {
         Text populationLabel = new Text();
         populationLabel.setText("Número da população:");
         Text mutationLabel = new Text();
-        mutationLabel.setText("Taxa de mutação de 0 a 100:");
+        mutationLabel.setText("Taxa de mutação (0 a 100):");
         Text crossoverLabel = new Text();
-        crossoverLabel.setText("Taxa de crossover de 0 a 100:");
+        crossoverLabel.setText("Taxa de crossover (0 a 100):");
 
         // por default crossover tera 100% e a mutacao 5%
         TextField populationText = new TextField("20");
@@ -103,8 +103,8 @@ public class MainInterface extends Application {
                     mutationRate = getRateText(mutationRateText.getText(), 5);
                     crossoverRate = getRateText(crossoverRateText.getText(), 100);
     
-                    //System.out.println("Valor digitado: " + population);
-                    //System.out.println("Tipo de visualizacao: " + isCompleteVisualization);
+                    //System.out.println("Populacao: " + population);
+                    //System.out.println("Tipo de visualizacao: " + selected);
 
                     controller.startExperiment(population, mutationRate, crossoverRate);
                     if(isCompleteVisualization) {

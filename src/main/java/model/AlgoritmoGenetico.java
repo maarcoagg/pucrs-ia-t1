@@ -79,7 +79,7 @@ public class AlgoritmoGenetico {
 
     public String getBestCromossomo() {
       int[] cromossomo = populacao[getMelhor()];
-      StringBuilder sb = new StringBuilder("Melhor Combinação de quartos encontrada:\n");
+      StringBuilder sb = new StringBuilder("Melhor combinação de quartos encontrada:\n");
       for(int i = 0; i < cromossomo.length-1; i++)
           sb.append("- Quarto ").append(i+1).append(": A").append(i+1).append(", B").append(cromossomo[i]+1).append("\n");
       sb.append("Aptidao: ").append(cromossomo[cromossomo.length-1]);
