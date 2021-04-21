@@ -38,6 +38,7 @@ public class MainInterface extends Application {
     private ObservableList list; 
 
     private boolean isCompleteVisualization = false;
+    private int generation;
     private int population;
     private int mutationRate;
     private int crossoverRate;
@@ -49,14 +50,17 @@ public class MainInterface extends Application {
         final Button openButton = new Button("Abrir arquivo...");
         final Button startButton = new Button("Iniciar experimento");
 
+        Text generationLabel = new Text();
+        generationLabel.setText("Quantidade de gerações:");
         Text populationLabel = new Text();
-        populationLabel.setText("Número da população:");
+        populationLabel.setText("Tamanho da população:");
         Text mutationLabel = new Text();
         mutationLabel.setText("Taxa de mutação (0 a 100):");
         Text crossoverLabel = new Text();
         crossoverLabel.setText("Taxa de crossover (0 a 100):");
 
         // por default crossover tera 100% e a mutacao 5%
+        TextField generationText = new TextField("10000");
         TextField populationText = new TextField("20");
         TextField mutationRateText = new TextField("5");
         TextField crossoverRateText = new TextField("100");
@@ -99,6 +103,7 @@ public class MainInterface extends Application {
                     else
                         isCompleteVisualization = true;
                     
+                    generation = getRateText(generationText.getText(), 10000);
                     population = getRateText(populationText.getText(), 20);
                     mutationRate = getRateText(mutationRateText.getText(), 5);
                     crossoverRate = getRateText(crossoverRateText.getText(), 100);
@@ -106,7 +111,7 @@ public class MainInterface extends Application {
                     //System.out.println("Populacao: " + population);
                     //System.out.println("Tipo de visualizacao: " + selected);
 
-                    controller.startExperiment(population, mutationRate, crossoverRate);
+                    controller.startExperiment(generation, population, mutationRate, crossoverRate);
                     if(isCompleteVisualization) {
                         String finalT = controller.showCompleteResult() +"\n"+ controller.showFinalResult();
                         showExperiment(finalT);
@@ -121,7 +126,7 @@ public class MainInterface extends Application {
         root.setMargin(hbox, new Insets(20, 20, 20, 20));  
 
         list = root.getChildren(); 
-        list.addAll(hbox, populationLabel, populationText, mutationLabel, mutationRateText, crossoverLabel, crossoverRateText);
+        list.addAll(hbox, generationLabel, generationText, populationLabel, populationText, mutationLabel, mutationRateText, crossoverLabel, crossoverRateText);
         list.add(sp);
         Scene scene = new Scene(root, 740, 580);
         stage.setScene(scene);
@@ -137,6 +142,7 @@ public class MainInterface extends Application {
 
     private void showExperiment(String result) { 
         Label l = new Label(result);
+        sp.setContent(null);
         sp.setContent(l);
     }
 

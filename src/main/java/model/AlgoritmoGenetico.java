@@ -15,7 +15,7 @@ public class AlgoritmoGenetico {
     public static int[][] populacaoVazia = null;
     public static int TAM_POPULACAO;
     public static int TAM_ALUNOS;
-    private static StringBuilder sbDetails = new StringBuilder("Visualizão detalhada:\n");
+    private static StringBuilder sbDetails = null;
 
 
     public String loadFileAndInitAlunos(File file) {
@@ -44,36 +44,48 @@ public class AlgoritmoGenetico {
 
     private static boolean checkProbability(int percent) {
         int randomPercentage = Math.round(rand.nextFloat()*100);
-        debug("Received percentage = "+percent+"%\trandomPercentage = "+randomPercentage+"%\tapproved? "+ ((randomPercentage<=percent) ? true : false));
+        //debug("Received percentage = "+percent+"%\trandomPercentage = "+randomPercentage+"%\tapproved? "+ ((randomPercentage<=percent) ? true : false));
         return (randomPercentage<=percent) ? true : false;
     }
 
-    public void iniciaExperimento(int populationSize, int mutationRate, int crossoverRate) {
+    public void iniciaExperimento(int generationSize, int populationSize, int mutationRate, int crossoverRate) {
+        sbDetails = new StringBuilder("Visualizão detalhada:\n");
+        sbDetails.append("População inicial \n");
         initPopulacao(populationSize);
-        for (int g=0; g<5; g++)
+        calculaAptidao();
+        printPopulacao();
+        if (!verificaCondicoesDeParada())
         {
-            //  Calcula aptidão da geração atual
-            sbDetails.append("Geracao: ").append((g + 1)).append("\n");
-            calculaAptidao();
-            // Mostra resultado do cálculo
-            int melhorCromossomo = getMelhorCromossomo();
-            int piorCromossomo = getPiorCromossomo();
-            sbDetails.append("  Melhor  Cromossomo: ").append((melhorCromossomo + 1)).append("\n");
-            sbDetails.append("  Pior  Cromossomo: ").append((piorCromossomo + 1)).append("\n");
-            printPopulacao();
-            // Verifica se chegou na condição ideal
-            if (isIdeal(melhorCromossomo))
+            for (int g=0; g < generationSize; g++)
             {
-                sbDetails.append("  Condição de parada atendida!").append("\n");
-                break;
+                sbDetails.append("Geracao: ").append((g + 1)).append("\n");
+                iniciaTabelaIntermediaria();
+                sbDetails.append("Fazendo crossover (chance de "+crossoverRate+"%)\n");
+                crossoverPBX(crossoverRate);
+                populacao = intermediaria.clone();
+                calculaAptidao(); //  Calcula aptidão da geração atual
+                printPopulacao(); // Mostra resultado do cálculo
+                mutacao(mutationRate);
+                if(verificaCondicoesDeParada()) // Verifica se chegou na condição ideal
+                    break;
             }
-
-            //if(checkProbability(crossoverRate))
-            crossoverPBX(crossoverRate);
-            populacao = intermediaria.clone();
-            //if(checkProbability(mutationRate))
-            mutacao(mutationRate);
         }
+    }
+
+    public boolean verificaCondicoesDeParada()
+    {
+        int melhorCromossomo = getMelhorCromossomo();
+        int piorCromossomo = getPiorCromossomo();
+        sbDetails.append("\t- Melhor  Cromossomo: ").append((melhorCromossomo + 1)).append("\n");
+        sbDetails.append("\t- Pior  Cromossomo: ").append((piorCromossomo + 1)).append("\n");
+
+        if (isIdeal(melhorCromossomo))
+        {
+            debug("Condição de parada atendida!");
+            sbDetails.append("\tCondição de parada atendida!").append("\n");
+            return true;
+        }
+        return false;
     }
 
     public String getBestCromossomo() {
@@ -176,7 +188,7 @@ public class AlgoritmoGenetico {
                     if (contains)
                     {
                         populacao[i][j] = aluno2;
-                        populacaoVazia[i][j] = -1;
+                        populacaoVazia[i][j] = -100;
                         disponivel.remove(aluno2);
                     }
                 }
@@ -217,7 +229,7 @@ public class AlgoritmoGenetico {
 
     private static int getPesoSala(int alunoA, int alunoB)
     {
-        int pesoA = getPesoColegas(alunoA, alunoB+TAM_ALUNOS);
+        int pesoA = getPesoColegas(alunoA, alunoB);
         int pesoB = getPesoColegas(alunoB+TAM_ALUNOS, alunoA);
         return pesoA + pesoB;       
     }
@@ -302,12 +314,12 @@ public class AlgoritmoGenetico {
     {
         // Escolhe quartos para realizar o swap.
         ArrayList<Integer> quartosSelecionados = new ArrayList<>();
-        debug("Selecionando quartos (chance de "+randomRate+"%)...");
+        //debug("Selecionando quartos (chance de "+randomRate+"%)...");
         for (int k=0; k<TAM_ALUNOS; k++)
         {
             if (checkProbability(randomRate))
             {
-                debug("\tQuarto selecionado: "+k+".");
+                //debug("\tQuarto selecionado: "+k+".");
                 quartosSelecionados.add(k);
             }
         }
@@ -316,19 +328,21 @@ public class AlgoritmoGenetico {
     }
 
     // funcao para pegar uma dupla disponivel que ainda nao foi utilizada
-    public static int getAvaliablePartner(int cromossomo, ArrayList<Integer> quartosUsados) {
-        for(int i = 0; i < TAM_ALUNOS; i++) {
-            if(!quartosUsados.contains(populacao[cromossomo][i])) {
-                quartosUsados.add(populacao[cromossomo][i]);
-                return populacao[cromossomo][i];
+    public static int getAvaliablePartner(int cromossomo, ArrayList<Integer> alunosUsados) {
+        for(int alunoA = 0; alunoA < TAM_ALUNOS; alunoA++)
+        {
+            int alunoB = populacao[cromossomo][alunoA];
+            if(!alunosUsados.contains(alunoB))
+            {
+                return alunoB;
             }
         }
 
         return -1;
     }
 
-    public static void crossoverPBX(int crossoverRate) {
-        debug("Iniciando crossover PBX...");
+    public static void iniciaTabelaIntermediaria()
+    {
         intermediaria = populacaoVazia.clone();
         int melhorCromossomo = getMelhorCromossomo();
 
@@ -336,7 +350,9 @@ public class AlgoritmoGenetico {
         debug("Repassando melhor cromossomo para posição 0 da população intermediária...");
         for(int i = 0; i < TAM_ALUNOS; i++)
             intermediaria[0][i] = populacao[melhorCromossomo][i];
-        
+    }
+
+    public static void crossoverPBX(int crossoverRate) {
         // Populando tabela intermediária
         debug("Iniciando crossover PBX...");
         int p = 1;
@@ -355,35 +371,34 @@ public class AlgoritmoGenetico {
                 ArrayList<Integer> quartosSelecionados = selecionaQuartosAleatoriamente(50);
 
                 // arrays com os quartos ja utilizados
-                ArrayList<Integer> quartosUsadosC1 = new ArrayList<>();
-                ArrayList<Integer> quartosUsadosC2 = new ArrayList<>();
+                ArrayList<Integer> alunosUsadosC1 = new ArrayList<>();
+                ArrayList<Integer> alunosUsadosC2 = new ArrayList<>();
 
                 // Faz o swap nos quartos selecionados
                 for (int i=0; i<quartosSelecionados.size(); i++)
                 {
                     int alunoA = quartosSelecionados.get(i);
                     debug("Fazendo swapping dos cromossomos "+c1+" e "+c2+" no quarto de A"+alunoA+"...");
-
                     int aluno1 = populacao[c1][alunoA];
                     int aluno2 = populacao[c2][alunoA];
 
                     debug("\tAntes: C["+c1+"] = (A"+alunoA+",B"+aluno1+") e C["+c2+"] = (A"+alunoA+",B"+aluno2+")");
 
                     intermediaria[p][alunoA] = aluno2;
-                    //adiciona aluno usado em c1 
-                    quartosUsadosC1.add(intermediaria[p][alunoA]);
+                    alunosUsadosC1.add(aluno2);
                     debug("Aluno  B"+aluno2+" usado em C1...");
-                    if (p+1 < TAM_ALUNOS)
+                    if (p+1 < TAM_POPULACAO) {
+                        //int[] c = intermediaria[p+1]; //testa o indice do cromossomo
                         intermediaria[p+1][alunoA] = aluno1;
-                         //adiciona aluno usado em c2
-                        quartosUsadosC2.add(intermediaria[p+1][alunoA]);
+                        alunosUsadosC2.add(aluno1);
                         debug("Aluno B"+aluno1+" usado em C2...");
+                    }
 
                     String depois = "\tDepois: C["+p+"] = (A"+alunoA+",B"+intermediaria[p][alunoA]+") e C["+(p+1)+"] ";
-                    if (p+1 < TAM_ALUNOS)
+                    if (p+1 < TAM_POPULACAO)
                         depois += "= (A"+alunoA+",B"+intermediaria[p+1][alunoA]+")";
                     else
-                        depois += "ignorado pois ultrapassa tamanho da população (máx: "+(TAM_POPULACAO-1)+")";
+                        depois += "ignorado pois ultrapassa tamanho limite da população (máx: "+(TAM_POPULACAO-1)+")";
                     debug(depois);
                 }
                 
@@ -394,17 +409,19 @@ public class AlgoritmoGenetico {
                     if (!quartosSelecionados.contains(i))
                     {
                         //valido a funcao para cada um dos cromossomos
-                        int quartoDisponivelC1 = getAvaliablePartner(c1, quartosUsadosC1);
-                        int quartoDisponivelC2 = getAvaliablePartner(c2, quartosUsadosC2);
+                        int alunoDisponivelC1 = getAvaliablePartner(c1, alunosUsadosC1);
+                        int alunoDisponivelC2 = getAvaliablePartner(c2, alunosUsadosC2);
 
-                        if(quartoDisponivelC1 != -1) {
-                            intermediaria[p][i] = quartoDisponivelC1;
+                        if(alunoDisponivelC1 != -1) {
+                            intermediaria[p][i] = alunoDisponivelC1;
+                            alunosUsadosC1.add(alunoDisponivelC1);
                         }
 
                         //verifica se nao é a ultima posicao disponivel
-                        if (p+1 < TAM_ALUNOS) {
-                            if(quartoDisponivelC1 != -1) {
-                                intermediaria[p+1][i] = quartoDisponivelC2;
+                        if (p+1 < TAM_POPULACAO) {
+                            if(alunoDisponivelC2 != -1) {
+                                intermediaria[p+1][i] = alunoDisponivelC2;
+                                alunosUsadosC2.add(alunoDisponivelC2);
                             }
                         }
                     }
@@ -424,7 +441,11 @@ public class AlgoritmoGenetico {
     }
 
     public static void mutacao(int mutationRate){
-        int cromossomo = rand.nextInt(TAM_POPULACAO);
+        if (TAM_POPULACAO < 2)
+            return;
+        int cromossomo = 0;
+        while (cromossomo == 0)
+            cromossomo = rand.nextInt(TAM_POPULACAO);
         int quarto1 = rand.nextInt(TAM_ALUNOS);
         int quarto2 = rand.nextInt(TAM_ALUNOS);
         
@@ -435,6 +456,8 @@ public class AlgoritmoGenetico {
         int aux = alunoB1;
         populacao[cromossomo][quarto1] = alunoB2;
         populacao[cromossomo][quarto2] = aux;         
+        calculaAptidaoCromossomo(cromossomo);
+        sbDetails.append(printCromossomo(cromossomo));
     } 
     
     public String showVisualizationComplete() {
@@ -448,12 +471,15 @@ public class AlgoritmoGenetico {
         {
             sb.append("(A"+alunoA+", B"+populacao[c][alunoA]+") ");
         }
-        return sb.toString();
+        return sb.append("\n").toString();
     }
 
     public static void debug(String s)
     {
-        String debugText = "## [info]:\t "+s;
-        System.out.println(debugText);
+        if (s == null)
+        {
+            String debugText = "## [info]:\t "+s;
+            System.out.println(debugText);
+        }
     }
 }

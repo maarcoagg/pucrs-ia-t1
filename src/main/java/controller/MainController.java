@@ -20,7 +20,7 @@ public class MainController {
     return ag.getBestCromossomo();
   }
 
-  public void startExperiment(int sizeOfpopulation, int taxMutation, int taxCrossover) {
-    ag.iniciaExperimento(sizeOfpopulation, taxMutation, taxCrossover);
+  public void startExperiment(int generationSize, int populationSize, int mutationRate, int crossoverRate) {
+    ag.iniciaExperimento(generationSize, populationSize, mutationRate, crossoverRate);
   }  
 }
