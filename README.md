@@ -4,9 +4,9 @@
 
 1. Ciclo do algoritmo genético [OK]
 2. Função de Aptidão [OK]
-3. Visualização
-4. Relatório
-5. Apresentação
+3. Visualização [OK]
+4. Relatório [OK]
+5. Apresentação [OK]
 
 ### Opcional
 
