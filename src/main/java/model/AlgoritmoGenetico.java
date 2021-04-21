@@ -17,7 +17,6 @@ public class AlgoritmoGenetico {
     public static int TAM_ALUNOS;
     private static StringBuilder sbDetails = null;
 
-
     public String loadFileAndInitAlunos(File file) {
         try { 
             Scanner s = new Scanner(file);
@@ -63,7 +62,7 @@ public class AlgoritmoGenetico {
                 sbDetails.append("Fazendo crossover (chance de "+crossoverRate+"%)\n");
                 crossoverPBX(crossoverRate);
                 populacao = intermediaria.clone();
-                calculaAptidao(); //  Calcula aptidão da geração atual
+                calculaAptidao(); // Calcula aptidão da geração atual
                 printPopulacao(); // Mostra resultado do cálculo
                 mutacao(mutationRate);
                 if(verificaCondicoesDeParada()) // Verifica se chegou na condição ideal
@@ -76,8 +75,8 @@ public class AlgoritmoGenetico {
     {
         int melhorCromossomo = getMelhorCromossomo();
         int piorCromossomo = getPiorCromossomo();
-        sbDetails.append("\t- Melhor  Cromossomo: ").append((melhorCromossomo + 1)).append("\n");
-        sbDetails.append("\t- Pior  Cromossomo: ").append((piorCromossomo + 1)).append("\n");
+        sbDetails.append("\t* Melhor  Cromossomo: ").append((melhorCromossomo + 1)).append("\n");
+        sbDetails.append("\t* Pior  Cromossomo: ").append((piorCromossomo + 1)).append("\n");
 
         if (isIdeal(melhorCromossomo))
         {
@@ -250,11 +249,11 @@ public class AlgoritmoGenetico {
     {
         int j;
         //System.out.println("Populacao:");
-        sbDetails.append("      População:").append("\n");
+        sbDetails.append("\tPopulação:").append("\n");
         for(int i = 0; i < TAM_POPULACAO; i++)
         {
             //System.out.print("C"+(i+1)+": ");
-            sbDetails.append("       C").append(i + 1).append(": ");
+            sbDetails.append("\tC").append(i + 1).append(": ");
             for(j = 0; j < TAM_ALUNOS; j++)
             {
                 //System.out.print("[A"+(j+1)+",B"+(populacao[i][j]+1)+"] ");
@@ -363,9 +362,10 @@ public class AlgoritmoGenetico {
                 // Escolhe cromossomos por torneio...
                 int c1 = torneio();
                 int c2 = torneio();
+                sbDetails.append("Cromossomos selecionados por torneio: C"+c1+" e C"+c2+"...");
                 debug("Cromossomos selecionados por torneio: C"+c1+" e C"+c2);
-                debug("\tC"+c1+" antes do crossover: "+printCromossomo(c1));
-                debug("\tC"+c2+" antes do crossover: "+printCromossomo(c2));
+                debug("\tC"+c1+" antes do crossover: "+printCromossomo(c1, populacao));
+                debug("\tC"+c2+" antes do crossover: "+printCromossomo(c2, populacao));
 
                 // Escolhe quartos para realizar o swap.
                 ArrayList<Integer> quartosSelecionados = selecionaQuartosAleatoriamente(50);
@@ -403,7 +403,7 @@ public class AlgoritmoGenetico {
                 }
                 
                 // Preenche quartos não-selecionados
-                debug("Preenchendo os "+(TAM_ALUNOS-quartosSelecionados.size())+" quartos restantes de C"+c1+" e C"+c2+"...");
+                debug("Preenchendo os "+(TAM_ALUNOS-quartosSelecionados.size())+" quartos restantes de C"+p+" e C"+(p+1)+"...");
                 for(int i = 0; i < TAM_ALUNOS; i++)
                 {
                     if (!quartosSelecionados.contains(i))
@@ -426,6 +426,9 @@ public class AlgoritmoGenetico {
                         }
                     }
                 }
+                sbDetails.append("\n\tDepois do crossover:\t").append(printCromossomo(p, intermediaria));
+                if (p+1 < TAM_POPULACAO)
+                    sbDetails.append("\tDepois do crossover:\t").append(printCromossomo(p+1, intermediaria));
                 p += 2;
             }
             else
@@ -443,35 +446,36 @@ public class AlgoritmoGenetico {
     public static void mutacao(int mutationRate){
         if (TAM_POPULACAO < 2)
             return;
-        int cromossomo = 0;
-        while (cromossomo == 0)
-            cromossomo = rand.nextInt(TAM_POPULACAO);
+        int c = 0;
+        while (c == 0)
+            c = rand.nextInt(TAM_POPULACAO);
         int quarto1 = rand.nextInt(TAM_ALUNOS);
         int quarto2 = rand.nextInt(TAM_ALUNOS);
         
         //System.out.println("Cromossomo " + (cromossomo+1) + " sofreu MUTAÇÃO nos quartos " + (quarto1+1) + " e " + (quarto2+1));
-        sbDetails.append("  Cromossomo ").append(cromossomo+1).append(" sofreu MUTAÇÃO nos quartos ").append((quarto1+1)).append(" e ").append( (quarto2+1)).append("\n");
-        int alunoB1 = populacao[cromossomo][quarto1];
-        int alunoB2 = populacao[cromossomo][quarto2];
+        sbDetails.append("\tCromossomo ").append(c+1).append(" sofreu MUTAÇÃO nos quartos ").append((quarto1+1)).append(" e ").append( (quarto2+1)).append("\n");
+        int alunoB1 = populacao[c][quarto1];
+        int alunoB2 = populacao[c][quarto2];
         int aux = alunoB1;
-        populacao[cromossomo][quarto1] = alunoB2;
-        populacao[cromossomo][quarto2] = aux;         
-        calculaAptidaoCromossomo(cromossomo);
-        sbDetails.append(printCromossomo(cromossomo));
+        populacao[c][quarto1] = alunoB2;
+        populacao[c][quarto2] = aux;         
+        calculaAptidaoCromossomo(c);
+        sbDetails.append("\t\t").append(printCromossomo(c, populacao));
     } 
     
     public String showVisualizationComplete() {
         return sbDetails.toString();
     }
 
-    private static String printCromossomo(int c)
+    private static String printCromossomo(int c, int[][] pop)
     {
-        StringBuilder sb = new StringBuilder("C["+c+"]: ");
+        StringBuilder sb = new StringBuilder("C"+(c+1)+": ");
         for(int alunoA = 0; alunoA < TAM_ALUNOS; alunoA++)
         {
-            sb.append("(A"+alunoA+", B"+populacao[c][alunoA]+") ");
+            sb.append("[A"+alunoA+",B"+pop[c][alunoA]+"] ");
         }
-        return sb.append("\n").toString();
+        sb.append("FA: ").append(pop[c][TAM_ALUNOS]).append("\n");
+        return sb.toString();
     }
 
     public static void debug(String s)
