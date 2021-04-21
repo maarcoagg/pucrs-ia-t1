@@ -1,8 +1,0 @@
-MainInterface.java
- MainInterface
- MainInterface$1
- MainInterface$2
-controller/MainController.java
- MainController
-model/AlgoritmoGenetico.java
- AlgoritmoGenetico
